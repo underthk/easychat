@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Chat Room</title>
+            <!-- 引入jQuery -->
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <!-- 引入Socket.IO客户端库 -->
+            <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+            <!-- 本地js文件 -->
+            <script type="text/javascript" src="{{ url_for('static',filename='JavaScript/index.js') }}"></script>
+
+
+{#        <style>#}
+{#            body {#}
+{#                margin: 0;#}
+{#                padding: 0;#}
+{#                font-family: Arial, sans-serif;#}
+{#                background: #2c3e50;#}
+{#                display: flex;#}
+{#                height: 100vh;#}
+{#                overflow: hidden;#}
+{#            }#}
+{##}
+{#            .sidebar {#}
+{#                width: 250px;#}
+{#                background: #34495e;#}
+{#                color: white;#}
+{#                display: flex;#}
+{#                flex-direction: column;#}
+{#                padding: 1em;#}
+{#                box-shadow: 2px 0 5px rgba(0,0,0,0.1);#}
+{#            }#}
+{##}
+{#            .sidebar .profile {#}
+{#                text-align: center;#}
+{#                margin-bottom: 2em;#}
+{#            }#}
+{##}
+{#            .sidebar .profile img {#}
+{#                width: 100px;#}
+{#                height: 100px;#}
+{#                border-radius: 50%;#}
+{#                margin-bottom: 1em;#}
+{#            }#}
+{##}
+{#            .sidebar .profile h3 {#}
+{#                margin: 0;#}
+{#            }#}
+{##}
+{#            .sidebar nav a {#}
+{#                text-decoration: none;#}
+{#                color: white;#}
+{#                padding: 0.5em 0;#}
+{#                margin: 0.5em 0;#}
+{#                display: block;#}
+{#                border-radius: 5px;#}
+{#                transition: background 0.3s;#}
+{#            }#}
+{##}
+{#            .sidebar nav a:hover {#}
+{#                background: #2c3e50;#}
+{#            }#}
+{##}
+{#            .chat-container {#}
+{#                flex: 1;#}
+{#                display: flex;#}
+{#                flex-direction: column;#}
+{#                overflow: hidden;#}
+{#                background: #ecf0f1;#}
+{#            }#}
+{##}
+{#            .chat-header {#}
+{#                background: #3498db;#}
+{#                padding: 1em;#}
+{#                color: white;#}
+{#                text-align: center;#}
+{#                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);#}
+{#            }#}
+{##}
+{#            .chat-messages {#}
+{#                flex: 1;#}
+{#                padding: 1em;#}
+{#                overflow-y: auto;#}
+{#            }#}
+{##}
+{#            .chat-messages .message {#}
+{#                margin-bottom: 1em;#}
+{#                padding: 0.5em;#}
+{#                background: #bdc3c7;#}
+{#                border-radius: 5px;#}
+{#            }#}
+{##}
+{#            .chat-input {#}
+{#                display: flex;#}
+{#                padding: 1em;#}
+{#                background: #34495e;#}
+{#            }#}
+{##}
+{#            .chat-input input {#}
+{#                flex: 1;#}
+{#                padding: 0.5em;#}
+{#                border: none;#}
+{#                border-radius: 3px;#}
+{#                margin-right: 1em;#}
+{#            }#}
+{##}
+{#            .chat-input button {#}
+{#                padding: 0.5em 1em;#}
+{#                border: none;#}
+{#                background: #3498db;#}
+{#                color: white;#}
+{#                border-radius: 3px;#}
+{#                cursor: pointer;#}
+{#            }#}
+{#        </style>#}
+    </head>
+    <body>
+        <form id="join_room" method="post" action="#">
+            <label>房间号:</label>
+            <input type="text" id="room_num" required>
+            <input type="submit" id="submit_room_num">
+        </form>
+        <button id="leave_room_button">离开房间</button>
+        <ul id="chat_content"></ul>
+        <form id="submit_from" method="post" action="#">
+            <textarea placeholder="请输入..." name="message" id="message" required></textarea>   <!-- 消息框 -->
+            <button type="submit">发送</button>
+        </form>
+
+
+<!--        <div class="sidebar">
+            <div class="profile">
+                <img src="https://via.placeholder.com/100" alt="Profile Picture">
+                <h3>underthk</h3>
+            </div>
+            <nav>
+{#                <a href="{{ url_for('information_page') }}">个人信息</a>#}
+{#                <a href="{{ url_for('settings_page') }}">设置</a>#}
+{#                <a href="{{ url_for('help_page') }}">帮助</a>#}
+{#                <a href="{{ url_for('login') }}">退出</a>#}
+            </nav>
+        </div>
+        <div class="chat-container">
+            <div class="chat-header">
+                <h2>Chat Room</h2>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chat-input" placeholder="Type a message">
+                <button id="send-button">Send</button>
+            </div>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const chatInput = document.getElementById('chat-input');
+                const sendButton = document.getElementById('send-button');
+                const chatMessages = document.getElementById('chat-messages');
+
+                sendButton.addEventListener('click', function() {
+                    const messageText = chatInput.value;
+                    if (messageText !== '') {
+                        const message = document.createElement('div');
+                        message.classList.add('message');
+                        message.textContent = messageText;
+                        chatMessages.appendChild(message);
+                        chatInput.value = '';
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }
+                });
+
+                chatInput.addEventListener('keypress', function(event) {
+                    if (event.key === 'Enter') {
+                        sendButton.click();
+                    }
+                });
+            });
+        </script> -->
+
+    </body>
+</html>
