@@ -13,6 +13,9 @@ app = Flask(__name__,template_folder='templates',static_folder='static')
 app.config['SECRET_KEY'] = 'zht'
 socketio = SocketIO(app,logging=True,engineio_logger=True)
 
+# 跨域
+# from flask_cors import CORS
+# CORS(app)
 
 # 数据库连接配置
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:zht281617@39.106.137.68/easychat'

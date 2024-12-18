@@ -53,5 +53,12 @@ $(document).ready(function () {
         $('#chat_content').append('<li>'+data["username"]+':'+data["message"] + '</li>')
     });
 
-
+    // 头像点击事件
+    $('#avatar').on('click', function() {
+        $('#settings').toggleClass('hidden');
+    });
+    // 关闭设置界面
+    $('#close_settings').on('click', function() {
+        $('#settings').addClass('hidden');
+    });
 })
